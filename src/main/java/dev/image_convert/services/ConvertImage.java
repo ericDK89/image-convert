@@ -1,5 +1,6 @@
 package dev.image_convert.services;
 
+import dev.image_convert.utils.IsImageFile;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -7,23 +8,55 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConvertImage {
+public class ConvertImage implements IConvertImage {
 
+  @Autowired
+  IsImageFile isImageFile;
+
+  @Override
   public String convertSingleFile(File imgFile, float quality) throws IOException {
     BufferedImage img = ImageIO.read(imgFile);
     return convertToWebp(img, quality);
   }
 
-  public String convertToWebp(BufferedImage img, Float quality) throws IOException {
+  @Override
+  public List<String> convertDirectory(Path inputDir, float quality) throws IOException {
+    try (Stream<Path> filesList = Files.list(inputDir)) {
+
+      List<String> convertedFiles = new ArrayList<>();
+
+      filesList
+          .filter(isImageFile::execute)
+          .forEach(i -> {
+            try {
+              BufferedImage img = ImageIO.read(i.toFile());
+              convertedFiles.add(convertToWebp(img, quality));
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          });
+
+      return convertedFiles;
+
+    } catch (RuntimeException e) {
+      throw new RuntimeException();
+    }
+  }
+
+  private String convertToWebp(BufferedImage img, float quality) throws IOException {
     Iterator<ImageWriter> writerIterator = ImageIO.getImageWritersByFormatName("webp");
 
     if (!writerIterator.hasNext()) {
