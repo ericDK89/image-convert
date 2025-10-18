@@ -64,6 +64,11 @@
       <groupId>org.sejda.webp-imageio</groupId>
       <version>0.1.0</version>
     </dependency>
+    <dependency>
+      <artifactId>progressbar</artifactId>
+      <groupId>me.tongfei</groupId>
+      <version>0.10.0</version>
+    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>

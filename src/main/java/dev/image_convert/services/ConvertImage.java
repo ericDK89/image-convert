@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import me.tongfei.progressbar.ProgressBar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,16 +39,20 @@ public class ConvertImage implements IConvertImage {
 
       List<String> convertedFiles = new ArrayList<>();
 
-      filesList
-          .filter(isImageFile::execute)
-          .forEach(i -> {
-            try {
-              BufferedImage img = ImageIO.read(i.toFile());
-              convertedFiles.add(convertToWebp(img, quality));
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          });
+      List<Path> imagesFiles = filesList
+          .filter(isImageFile::execute).toList();
+
+      try (ProgressBar pb = new ProgressBar("Converting Images", imagesFiles.size())) {
+        for (Path imageFile : imagesFiles) {
+          try {
+            BufferedImage img = ImageIO.read(imageFile.toFile());
+            convertedFiles.add(convertToWebp(img, quality));
+            pb.step();
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        }
+      }
 
       return convertedFiles;
 
