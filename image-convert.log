@@ -57,3 +57,7 @@
 1760805189411:webp --d
 1760807796683:webp --d a
 1760808539498:webp --d a --q 1
+1762388040008:webp --d ~/Downloads --q 50
+1762388047608:webp --d ~/Downloads --q 0.5
+1762388109688:webp --d home/Downloads --q 0.5
+1762388131768:webp --d /home/eric/Downloads --q 0.5
